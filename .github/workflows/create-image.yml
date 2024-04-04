@@ -4,14 +4,9 @@ name: Build_Image
 
 env:
   VERSION: 22H1
-  BUILD: 20230724
-  OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-  ST_AUTH_VERSION: ${{ vars.ST_AUTH_VERSION }}
-  OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-  OS_PROJECT_DOMAIN_NAME: ${{ secrets.OS_PROJECT_DOMAIN_NAME }}
-  OS_PROJECT_NAME: ${{ secrets.OS_PROJECT_NAME }}
-  OS_USERNAME: ${{ secrets.OS_USERNAME }}
-  OS_USER_DOMAIN_NAME: ${{ secrets.OS_USER_DOMAIN_NAME }}
+  BUILD: 20240404
+  ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 
 # Controls when the workflow will run
@@ -44,4 +39,6 @@ jobs:
 
       - name: Uploading image in object storage
         run: |
-         swift.exe upload cloud-images D:\files-output\2k22\win-2k22-datacenter-bios.qcow2 --object-name win2k22/${{ env.BUILD }}/win-2k22-datacenter-bios.qcow2 --segment-size 5368709120 --use-slo
+         echo "Uploading image in object storage"
+         mc alias set s3-linit https://s3.linit-infra.net ${{ env.ACCESS_KEY }} ${{ env.SECRET_KEY }}
+         mc cp D:\files-output\2k22\win-2k22-datacenter-bios.qcow2 s3-linit/windows-server-2k22-image/${{ env.BUILD }}/win-2k22-datacenter-bios.qcow2
