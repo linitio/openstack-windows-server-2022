@@ -3,22 +3,20 @@
 name: Build_Image
 
 env:
-  VERSION: ${{ github.ref_name }} 
-  OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-  ST_AUTH_VERSION: ${{ vars.ST_AUTH_VERSION }}
-  OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-  OS_PROJECT_DOMAIN_NAME: ${{ secrets.OS_PROJECT_DOMAIN_NAME }}
-  OS_PROJECT_NAME: ${{ secrets.OS_PROJECT_NAME }}
-  OS_USERNAME: ${{ secrets.OS_USERNAME }}
-  OS_USER_DOMAIN_NAME: ${{ secrets.OS_USER_DOMAIN_NAME }}
+  BUILD: 21H2-20240405.0
+  S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+  ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  S3_ALIAS: ${{ secrets.S3_ALIAS }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  OUTPUT_PATH: ${{ secrets.OUTPATH }}
+  FILE_NAME: win-2k22-datacenter-uefi.qcow2
 
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    tags:
-      - "*"
     branches:
       - win-2k22-datacenter-uefi
   
@@ -35,7 +33,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Runs a single command using the runners shell
       - name: Building image
@@ -45,4 +43,7 @@ jobs:
 
       - name: Uploading image in object storage
         run: |
-         swift.exe upload cloud-images D:\files-output\2k22\win-2k22-datacenter-uefi.qcow2 --object-name win2k22/${{ env.BUILD }}/win-2k22-datacenter-uefi.qcow2 --segment-size 5368709120 --use-slo
+         echo "Uploading image in object storage"
+         mc alias set ${{ env.S3_ALIAS }} ${{ env.S3_ENDPOINT }} ${{ env.ACCESS_KEY }} ${{ env.SECRET_KEY }}
+         mc cp ${{ env.OUTPUT_PATH }}/${{ env.FILE_NAME }} ${{ env.S3_BUCKET }}/latest/${{ env.FILE_NAME }}
+         mc cp ${{ env.S3_BUCKET }}/latest/${{ env.FILE_NAME }} ${{ env.S3_BUCKET }}/${{ env.BUILD }}/${{ env.FILE_NAME }}
