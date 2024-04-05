@@ -4,7 +4,7 @@ name: Build_Image
 
 env:
   VERSION: 22H1
-  BUILD: 20240404
+  BUILD: ${{ github.ref_name }} 
   ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
